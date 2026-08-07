@@ -1,14 +1,24 @@
 ---
 import type { CmsFields, InferCmsOutput } from '@@sf/content';
 import { bannerListCmsField } from '@@sf/composables/use-banner';
-import BannerPictures from '@@sf/components/BannerPictures.astro';
-import Banner from '~/components/Banner.vue';
+import Picture from '@@sf/components/Picture.astro';
 
+/*
+ * Grade de banners — variante Pauta (papelaria e escritório).
+ *
+ * NÃO usa o `Banner.vue` do starter. Com `title`/`subtitle` preenchidos ele
+ * vira um grid de duas colunas com `p-12 xl:ps-32`, dimensionado para largura
+ * total. Numa coluna de 1/3 o texto quebra UMA PALAVRA POR LINHA e a imagem
+ * some — apareceu no primeiro print desta loja e é o mesmo defeito que a
+ * Bitola já tinha documentado.
+ *
+ * Idioma do tema: legenda ABAIXO da foto, com o título GRIFADO em marca-texto.
+ * É a única aplicação de `.ui-grifo` fora de texto corrido, e vale porque é
+ * exatamente o gesto que a marca imita — passar o marcador por cima do que
+ * interessa numa lista.
+ */
 export const cmsFields = ({
-  banners: {
-    required: true,
-    ...bannerListCmsField,
-  },
+  banners: { required: true, ...bannerListCmsField },
 }) as const satisfies CmsFields;
 
 export type Props = InferCmsOutput<typeof cmsFields>;
@@ -16,12 +26,35 @@ const { banners = [] } = Astro.props;
 ---
 
 <section class="ui-section">
-  <ul class="flex flex-wrap gap-4 lg:flex-nowrap">
+  <ul class="grid grid-cols-1 gap-4 sm:grid-cols-3">
     {banners.map((banner) => (
-      <li class="lg:flex-1 [&_img]:w-full [&_img]:object-cover">
-        <Banner {...banner}>
-          <BannerPictures {...banner} slot="picture" />
-        </Banner>
+      <li>
+        <a
+          href={banner.href || '#'}
+          class="group block overflow-hidden rounded border border-base-200
+          bg-white transition hover:border-primary"
+        >
+          <Picture
+            src={banner.img}
+            alt={banner.alt || ''}
+            widths={[400, 640, 828]}
+            sizes="(min-width: 640px) 33vw, 100vw"
+            loading="lazy"
+            class="aspect-[3/2] w-full object-cover"
+          />
+          {(banner.title || banner.subtitle) && (
+            <div class="px-4 py-3.5">
+              {banner.title && (
+                <h3 class="font-brand text-lg font-bold leading-tight text-base-900">
+                  <span class="ui-grifo">{banner.title}</span>
+                </h3>
+              )}
+              {banner.subtitle && (
+                <p class="mt-1.5 text-xs text-base-600">{banner.subtitle}</p>
+              )}
+            </div>
+          )}
+        </a>
       </li>
     ))}
   </ul>

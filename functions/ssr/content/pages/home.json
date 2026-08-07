@@ -1,41 +1,45 @@
 {
-  "metaTitle": "",
-  "metaDescription": "",
+  "metaTitle": "Pauta — papelaria e escritório para quem recompra",
+  "metaDescription": "Pedido rápido colando códigos, lista salva e preço que cai por volume.",
   "hero": {
     "autoplay": 9000,
     "slides": [
       {
         "startsAt": "",
         "endsAt": "",
-        "img": "/img/uploads/rect89.webp",
-        "alt": "Headset banner",
-        "mobileImg": "/img/uploads/headphone.webp",
-        "href": "/headset",
-        "title": "20% off on first purchase",
-        "subtitle": "At demoStore you can shop the best tech of 2023. Enjoy and get 10% off on your first purchase!",
-        "buttonLink": "/",
-        "buttonText": "See"
+        "img": "/img/uploads/hero-escrita-desk.jpg",
+        "alt": "Canetas variadas alinhadas sobre superfície branca",
+        "mobileImg": "/img/uploads/hero-escrita-mob.jpg",
+        "href": "",
+        "title": "O mesmo pedido, em um passo",
+        "subtitle": "Cole a lista de códigos e pronto. Sem navegar o catálogo item por item.",
+        "buttonLink": "/p/pedido-rapido",
+        "buttonText": "Como funciona"
       },
       {
         "startsAt": "",
         "endsAt": "",
-        "img": "/img/uploads/rect859.png",
-        "alt": "",
-        "mobileImg": "",
+        "img": "/img/uploads/hero-reposicao-desk.jpg",
+        "alt": "Prateleiras com pastas e fichários coloridos",
+        "mobileImg": "/img/uploads/hero-reposicao-mob.jpg",
         "href": "",
-        "title": "",
-        "subtitle": "",
-        "buttonLink": "",
-        "buttonText": ""
+        "title": "Quanto mais, menos",
+        "subtitle": "A faixa de preço por volume aparece no próprio anúncio — você vê antes de fechar.",
+        "buttonLink": "/p/preco-por-volume",
+        "buttonText": "Ver as faixas"
       }
     ]
   },
   "sections": [
     {
+      "type": "c:pedido-rapido",
+      "title": "Pedido rápido"
+    },
+    {
       "type": "product-shelf",
       "collectionIdAndInfo": null,
-      "sort": "-price_discount,-sales",
-      "title": "",
+      "sort": "-sales",
+      "title": "Os mais repostos",
       "isHeadless": false,
       "isShuffle": false,
       "limit": 12,
@@ -45,19 +49,37 @@
       "type": "banners-grid",
       "banners": [
         {
-          "img": "/img/uploads/rect8589.png",
-          "href": ""
+          "img": "/img/uploads/banner-escrita.jpg",
+          "alt": "Conjunto de canetas de caligrafia",
+          "href": "/escrita-e-papel",
+          "title": "Escrita e papel",
+          "subtitle": "Caneta, caderno e resma"
         },
         {
-          "img": "/img/uploads/passion.webp",
-          "href": ""
+          "img": "/img/uploads/banner-organizacao.jpg",
+          "alt": "Cadernos enfileirados em prateleira",
+          "href": "/organizacao-de-escritorio",
+          "title": "Organização",
+          "subtitle": "Pasta, arquivo e etiqueta"
         },
         {
-          "img": "/img/uploads/rect89.webp",
-          "href": "",
-          "mobileImg": "/img/uploads/headphone.webp"
+          "img": "/img/uploads/banner-volume.jpg",
+          "alt": "Estante com fichários e pastas",
+          "href": "/p/preco-por-volume",
+          "title": "Preço por volume",
+          "subtitle": "A faixa de cada item"
         }
       ]
+    },
+    {
+      "type": "product-shelf",
+      "collectionIdAndInfo": null,
+      "sort": "-price_discount",
+      "title": "Em promoção",
+      "isHeadless": false,
+      "isShuffle": false,
+      "limit": 12,
+      "page": 1
     }
   ]
 }

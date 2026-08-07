@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Pauta">
+  <rect width="64" height="64" rx="12" fill="#26418f" />
+  <g stroke="#f9fafb" stroke-width="4" stroke-linecap="round">
+    <path d="M16 21h32" />
+    <path d="M16 32h32" />
+  </g>
+  <path d="M16 44h20" stroke="#f2b705" stroke-width="7" stroke-linecap="round" />
+</svg>

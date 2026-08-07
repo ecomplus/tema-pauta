@@ -23,6 +23,7 @@
     "@cloudcommerce/firebase": "^2.61.3",
     "@cloudcommerce/ssr": "^2.61.3",
     "@headlessui/vue": "^1.7.23",
+    "@iconify-json/lucide": "^1.2.121",
     "micromark": "^4.0.2"
   },
   "devDependencies": {

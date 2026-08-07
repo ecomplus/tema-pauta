@@ -1,6 +1,31 @@
-html {
-  scroll-behavior: smooth;
+/*
+ * Design system da variante Pauta (papelaria e material de escritório).
+ *
+ * O eixo do tema é RECOMPRA, não descoberta. Escritório compra a mesma lista
+ * todo mês; o que a loja precisa é encurtar o caminho entre "preciso repor" e
+ * "pedido feito". Daí o componente que só existe aqui: o pedido rápido por
+ * código colado (`sections/PedidoRapidoSection.astro`), que troca a navegação
+ * inteira por uma caixa de texto.
+ *
+ * Contra o resto do conjunto: é a outra variante B2B, ao lado da Bitola. O que
+ * as separa é o eixo — a Bitola resolve ESPECIFICAÇÃO (que parafuso serve),
+ * a Pauta resolve REPETIÇÃO (o mesmo pedido de novo). Por isso a Bitola põe a
+ * busca no centro e a Pauta põe a lista.
+ *
+ * O amarelo é GRIFO, nunca preenchimento: entra atrás de um trecho de texto,
+ * com `.ui-grifo`, e em nenhum outro lugar. Se ele virar fundo de bloco a
+ * marca perde a referência ao marca-texto.
+ *
+ * ATENÇÃO — `customCode.css` do CMS não funciona hoje (o `<style>` do
+ * `Base.astro` no pacote não interpola a expressão). Fontes definidas aqui.
+ */
+
+:root {
+  --custom-font-sans: 'Source Sans 3';
+  --font-brand: 'Space Grotesk', 'Source Sans 3', sans-serif;
 }
+
+html { scroll-behavior: smooth; }
 body {
   overflow-x: hidden;
   overflow-y: scroll;
@@ -16,58 +41,72 @@ a, button, button > *, [role=button], [role=button] > * {
 }
 
 .ui-link {
-  @apply font-medium text-primary underline underline-offset-4
+  @apply font-semibold text-primary underline underline-offset-4
   hover:text-primary-bold active:text-primary-subtle;
 }
 
 [class*=ui-btn] {
-  @apply inline-block text-base font-medium px-4 py-2 rounded
-  border-2 border-transparent underline-offset-4 decoration-2
-  shadow focus:ring-1 focus:ring-offset-1 active:ring-2;
+  @apply inline-block text-sm font-semibold normal-case tracking-normal
+  px-5 py-2.5 rounded border border-transparent
+  focus:ring-1 focus:ring-offset-1 active:ring-2;
 }
-.ui-btn-sm {
-  @apply text-sm px-3 py-1.5 border-1;
-}
-.ui-btn-lg {
-  @apply text-lg font-bold px-6 py-3 lg:text-base lg:py-2.5 active:ring-3;
-}
-.ui-btn-primary {
-  @apply primary border-primary hover:primary-bold ring-primary/30;
-}
+.ui-btn-sm { @apply text-xs px-3.5 py-1.5; }
+.ui-btn-lg { @apply text-base px-7 py-3 active:ring-3; }
+.ui-btn-primary { @apply primary border-primary hover:primary-bold ring-primary/30; }
 .ui-btn-secondary {
-  @apply bg-secondary-100/50 text-secondary border-secondary
-  hover:secondary ring-secondary/30;
+  @apply bg-transparent text-primary border-base-300
+  hover:border-primary hover:bg-primary/5 ring-primary/20;
 }
 .ui-btn-contrast {
-  @apply bg-white text-primary hover:bg-primary-100 ring-white/30
-  decoration-primary-300 underline shadow-none;
+  @apply bg-white text-primary hover:bg-base-100 ring-white/30 shadow-none;
 }
 .ui-btn-danger {
   @apply bg-danger-50 text-danger-700 border-danger-100
-  hover:bg-danger-600 hover:text-white
-  hover:border-danger-600 ring-danger-600/30;
+  hover:bg-danger-600 hover:text-white hover:border-danger-600 ring-danger-600/30;
 }
 
 .ui-text-brand, .ui-title {
-  @apply font-brand font-black italic;
+  @apply font-brand font-bold not-italic normal-case;
 }
 .ui-title {
-  @apply text-3xl xl:text-5xl text-balance;
+  @apply text-3xl xl:text-5xl leading-[1.05] tracking-[-0.02em] text-balance
+  text-base-900;
+}
+
+/*
+ * Grifo de marca-texto. `box-decoration-break` é o que faz o traço acompanhar
+ * a quebra de linha em vez de virar um retângulo só; sem ele um grifo de duas
+ * linhas fica com um bloco amarelo atravessando o meio do parágrafo.
+ *
+ * O gradiente para em 0.62 para o traço sentar na base da letra e deixar a
+ * ascendente livre — grifo real não cobre a palavra inteira.
+ */
+.ui-grifo {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0.62em,
+    theme('colors.secondary.DEFAULT') 0.62em,
+    theme('colors.secondary.DEFAULT') 100%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding-inline: 0.15em;
+}
+
+/* Código do produto: é por ele que a recompra acontece, então tem tipo
+   monoespaçado próprio e é selecionável de um clique no card. */
+.ui-codigo {
+  @apply inline-block font-mono text-[0.6875rem] font-semibold uppercase
+  tracking-wide text-base-500 select-all;
 }
 
 [class*=ui-badge] {
-  @apply text-center px-2.5 py-0.5 rounded-md font-semibold
-  inline-block bg-secondary-200 text-secondary-900;
+  @apply text-center px-2 py-0.5 rounded text-xs font-bold
+  normal-case inline-block bg-primary text-white;
 }
-[class*=ui-badge-pill] {
-  @apply text-sm leading-relaxed py-0 rounded-full;
-}
-.ui-badge-pill-sm {
-  @apply text-xs min-w-[1rem] px-0.5;
-}
-.ui-badge-pill-lg {
-  @apply text-lg min-w-[1.75rem] px-2;
-}
+[class*=ui-badge-pill] { @apply text-sm leading-relaxed py-0 rounded-full; }
+.ui-badge-pill-sm { @apply text-xs min-w-[1rem] px-0.5; }
+.ui-badge-pill-lg { @apply text-lg min-w-[1.75rem] px-2; }
 
 .ui-alert {
   @apply bg-warning-100 text-warning-800 border-warning-200
@@ -77,11 +116,7 @@ a, button, button > *, [role=button], [role=button] > * {
 [class*=ui-section] {
   @apply w-full mx-auto px-[1px] max-w-[calc(100vw-2rem)]
   sm:max-w-[calc(100vw-3rem)] md:max-w-[calc(100vw-4rem)]
-  xl:max-w-[min(80rem,calc(100vw-6rem))];
+  xl:max-w-[min(84rem,calc(100vw-4rem))];
 }
-.ui-section {
-  @apply my-6 md:my-8;
-}
-.ui-section-slim {
-  @apply my-3;
-}
+.ui-section { @apply my-5 md:my-8; }
+.ui-section-slim { @apply my-2; }

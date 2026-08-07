@@ -6,35 +6,45 @@
   },
   "customCode": {
     "css": "",
-    "htmlHead": "",
+    "htmlHead": "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap\">",
     "htmlBody": ""
   },
   "header": {
     "pitchBar": [
       {
-        "href": "/promotion",
-        "html": "Aproveite nossos descontos de até 50%!"
+        "href": "/p/pedido-rapido",
+        "html": "<b>Pedido rápido</b> <d-md>cole a lista de códigos e feche em um passo</d-md>"
+      },
+      {
+        "href": "/p/preco-por-volume",
+        "html": "<b>Preço cai por volume</b> <d-md>a faixa aparece no próprio anúncio</d-md>"
       },
       {
         "href": "",
-        "html": "<b>Frete grátis</b> <d-md>para todo Brasil</d-md> a partir de {free_shipping_from_value}"
+        "html": "<b>Frete grátis</b> <d-md>para todo o Brasil</d-md> a partir de {free_shipping_from_value}"
       }
     ],
     "inlineMenuCategories": {
-      "featured": [],
-      "random": 7
+      "featured": [
+        "escrita-e-papel",
+        "organizacao-de-escritorio"
+      ],
+      "random": 0
     },
-    "isAlphabeticalSortSubmenu": false
+    "isAlphabeticalSortSubmenu": true
   },
   "footer": {
     "categoriesList": {
       "isActive": true,
-      "title": "",
-      "slugs": []
+      "title": "Departamentos",
+      "slugs": [
+        "escrita-e-papel",
+        "organizacao-de-escritorio"
+      ]
     },
     "pagesList": {
       "isActive": true,
-      "title": "",
+      "title": "Ajuda",
       "links": []
     },
     "stamps": [

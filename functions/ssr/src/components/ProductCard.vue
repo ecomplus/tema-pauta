@@ -1,99 +1,109 @@
+<!--
+  Card de produto — variante Pauta (papelaria e material de escritório).
+
+  ── O CARD DE RECOMPRA ───────────────────────────────────────────────────
+  O eixo do tema é repetir um pedido, não descobrir um produto. Isso muda duas
+  coisas no card em relação a todas as outras variantes:
+
+  1. O CÓDIGO aparece, selecionável de um clique (`.ui-codigo` tem `select-all`).
+     É o dado que o comprador copia para a lista do `PedidoRapidoSection` — sem
+     ele o pedido rápido não tem de onde sair.
+
+  2. O seletor de QUANTIDADE fica no card, não na ficha. Papelaria se compra
+     em caixa com 50, resma com 500, pacote com 12 — abrir a ficha para trocar
+     de 1 para 10 é atrito puro num pedido de vinte itens.
+
+  E a linha de PREÇO POR VOLUME, que é o argumento comercial do nicho: o valor
+  cai a partir de uma quantidade, e mostrar isso no card é o que faz o
+  comprador aumentar o pedido sozinho.
+
+  ATENÇÃO: a faixa de volume é ESTÁTICA. Ligar de verdade depende de preço por
+  quantidade cadastrado (kit/atacado). Consta no README.
+
+  Input dentro de `<a>` navega ao clicar — por isso a linha de compra fica FORA
+  do `ALink` e a moldura passou para a div que envolve os dois. Mesma armadilha
+  que já custou tempo na Bitola e na Circuito.
+-->
 <template>
   <article
     ref="card"
     :data-sku="product.sku"
-    class="group relative mx-auto h-full max-w-[350px] px-0.5 py-3 hover:z-[1]"
+    class="group relative mx-auto h-full max-w-[320px] py-1.5"
   >
-    <ALink
-      :href="link"
-      class="flex h-full flex-col overflow-hidden rounded bg-white
-      ring-black/5 group-hover:shadow group-hover:ring-1"
+    <div
+      class="flex h-full flex-col rounded border border-base-200 bg-white p-3
+      transition hover:border-primary"
     >
-      <div class="aspect-square p-2
-        transition-transform md:group-hover:scale-110">
-        <div class="relative size-full overflow-hidden
-          rounded bg-white group-hover:rounded-none">
-          <span v-if="images?.length" class="text-xs text-opacity-70">
-            <AImg
-              :picture="images[0]"
-              :alt="title"
-              class="absolute left-0 top-0 block size-full object-cover"
-            />
-            <AImg
-              v-if="!isMobile && images[1] && wasHoveredOnce"
-              :picture="images[1]"
-              :alt="title"
-              class="absolute left-0 top-0 z-10 block size-full
-              object-cover text-transparent opacity-0 transition-opacity
-              group-hover:opacity-100 motion-safe:duration-300"
-            />
-          </span>
-          <div
-            v-else
-            class="size-full bg-gradient-to-br from-base-50/20 to-base-100"
+      <ALink :href="link" class="flex grow flex-col no-underline">
+        <div class="relative overflow-hidden rounded-sm bg-base-50">
+          <AImg
+            v-if="images?.length"
+            :picture="images[0]"
+            :alt="title"
+            class="block aspect-square w-full object-contain"
           />
+          <div v-else class="aspect-square w-full bg-base-100" />
+          <span
+            v-if="discountPercentage"
+            class=":uno: absolute left-0 top-0 z-20 bg-primary px-2 py-0.5
+            text-[0.6875rem] font-bold text-white"
+          >
+            -{{ discountPercentage }}%
+          </span>
         </div>
-      </div>
-      <span
-        v-if="discountPercentage"
-        class=":uno: absolute right-2 top-9
-        bg-secondary/70 py-0.5 pl-3 pr-1.5 text-xs text-on-secondary
-        transition-transform [clip-path:polygon(20%_0,100%_0,100%_100%,0_100%)]
-        md:group-hover:translate-x-2 md:group-hover:scale-110"
-      >
-        -<strong>{{ discountPercentage }}</strong>%
-      </span>
-      <div class="relative z-10 flex grow flex-col justify-between p-4">
+
         <component
           :is="headingTag"
-          class="line-clamp-2 no-underline ui-link"
-          :class="[
-            isActive ? 'text-base-700' : 'text-base-500',
-            link ? 'group-hover:text-primary group-hover:underline' : null,
-          ]"
+          class="mt-2.5 line-clamp-2 text-sm font-semibold leading-snug"
+          :class="isActive ? 'text-base-900' : 'text-base-500'"
         >
           {{ title }}
         </component>
-        <div class="pt-2">
-          <div v-if="isActive">
-            <Prices :product="product" />
-          </div>
-          <span v-else class="bg-warning-100 text-warning-700 ui-badge">
-            {{ !isInStock ? $t.i19outOfStock : $t.i19inactive }}
-          </span>
+      </ALink>
+
+      <!-- Fora do `ALink`: `select-all` dentro de um link seleciona e navega. -->
+      <p class="mt-1">
+        <span class="ui-codigo">{{ product.sku }}</span>
+      </p>
+
+      <div class="mt-auto pt-2">
+        <div v-if="isActive" class="[&_*]:font-bold [&_.text-xl]:text-xl">
+          <Prices :product="product" />
         </div>
-        <div v-if="isFailedToCart" class="pt-1 text-sm text-warning-800">
+        <p v-if="isActive" class="mt-0.5 text-[0.6875rem] leading-tight text-base-600">
+          <span class="font-semibold ui-grifo">a partir de 12 un.</span>
+          o preço cai
+        </p>
+        <span v-else class="bg-warning-100 text-warning-700 ui-badge">
+          {{ !isInStock ? $t.i19outOfStock : $t.i19inactive }}
+        </span>
+      </div>
+
+      <div v-if="isActive && !hasVariations" class="pt-2.5">
+        <div v-if="isFailedToCart" class="text-sm text-warning-800">
           {{ $t.i19someItemIsUnavailable }}
         </div>
-        <button
-          v-if="isActive && !hasVariations && !isFailedToCart"
-          class=":uno: absolute -top-6 left-0 -z-10 hidden w-full
-          rounded-none opacity-0 transition ui-btn-sm ui-btn-primary
-          group-hover:z-10 group-hover:opacity-100 md:block"
-          :style="buyCtaColor
-            ? `background: ${buyCtaColor}; border-color: ${buyCtaColor}`
-            : null"
-          @click.stop.prevent="loadToCart(1)"
-        >
-          <span class="mr-1 inline-block text-on-primary opacity-80">
-            &plus;
-          </span>
-          {{ $t.i19addToCart }}
-        </button>
+        <div v-else class="flex items-center gap-2">
+          <QuantitySelector v-model="quantityToAdd" />
+          <button
+            class=":uno: w-full ui-btn-sm ui-btn-primary"
+            @click.stop.prevent="loadToCart(quantityToAdd)"
+          >
+            {{ $t.i19addToCart }}
+          </button>
+        </div>
       </div>
-    </ALink>
+    </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { useElementHover } from '@vueuse/core';
 import {
   type Props as UseProductCardProps,
   useProductCard,
 } from '@@sf/composables/use-product-card';
-import { isMobile } from '@@sf/sf-lib';
-import { getAbValue } from '@@sf/state/ab-experiment';
 import Prices from '~/components/Prices.vue';
+import QuantitySelector from '~/components/QuantitySelector.vue';
 
 export type Props = UseProductCardProps & {
   headingTag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
@@ -114,11 +124,5 @@ const {
   isFailedToCart,
 } = useProductCard(props as UseProductCardProps);
 const card = ref<HTMLElement | null>(null);
-const isHovered = useElementHover(card);
-const wasHoveredOnce = ref(false);
-const unwatch = watch(isHovered, () => {
-  wasHoveredOnce.value = true;
-  unwatch();
-});
-const buyCtaColor = getAbValue('buyCtaColor');
+const quantityToAdd = ref(1);
 </script>

@@ -1,0 +1,31 @@
+<!--
+  Wordmark placeholder da variante "Pauta" (papelaria e escritório) — FONTE
+  EDITÁVEL. A loja serve o PNG gerado daqui: o `Picture` do storefront passa a
+  imagem pelo serviço de imagem do Astro, que rejeita `svg+xml`.
+
+  Regerar após editar:
+    cd .../public/img/uploads
+    node /home/vitorrgg/demo-catalog/scripts/rasterize.mjs \
+      /home/vitorrgg/store-pauta/functions/ssr \
+      logo-pauta.svg logo-pauta.png 1200
+
+  As linhas de pauta do caderno, com a última em amarelo de marca-texto — o
+  mesmo grifo que o tema usa em `.ui-grifo`. O nome tem duplo sentido (a linha
+  do papel e a pauta de reunião) e o desenho fica com o primeiro.
+
+  Fontes são as instaladas no ambiente que rasteriza (DejaVu/Ubuntu).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 72" width="300" height="72" role="img" aria-label="Pauta">
+  <!-- linhas de pauta -->
+  <g stroke="#26418f" stroke-width="2.6" stroke-linecap="round">
+    <path d="M12 24h44" />
+    <path d="M12 33h44" />
+    <path d="M12 42h44" />
+  </g>
+  <!-- a última linha é grifo, não pauta -->
+  <path d="M12 51h30" stroke="#f2b705" stroke-width="5" stroke-linecap="round" />
+  <!-- Linha de apoio em 10px: a 8 ela virava borrão no tamanho real do header
+       (`max-w-[210px]` encolhe a caixa de 300 unidades para ~0,7×). -->
+  <text x="70" y="41" font-family="Ubuntu Sans, DejaVu Sans, sans-serif" font-size="28" font-weight="700" fill="#20252c" letter-spacing="0.5">Pauta</text>
+  <text x="72" y="58" font-family="DejaVu Sans, system-ui, sans-serif" font-size="10" font-weight="600" fill="#586372" letter-spacing="1.8">PAPELARIA E ESCRITÓRIO</text>
+</svg>

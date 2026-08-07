@@ -1,0 +1,149 @@
+---
+/*
+  PEDIDO RÁPIDO — a seção que justifica esta variante existir.
+
+  Papelaria de escritório não é compra de descoberta: é reposição. O mesmo
+  comprador pede quase a mesma lista todo mês, e a navegação por vitrine é
+  atrito puro para ele — são doze cliques para repetir um pedido que ele já
+  sabe de cor.
+
+  Esta seção troca a navegação inteira por uma caixa de texto: cola o código e
+  a quantidade, uma por linha, e pronto. É a mesma ideia do "quick order" de
+  distribuidor B2B, e é o que separa a Pauta da Bitola: as duas são B2B, mas a
+  Bitola resolve ESPECIFICAÇÃO (que peça serve) e a Pauta resolve REPETIÇÃO.
+
+  ── O QUE É REAL E O QUE É DEMONSTRAÇÃO ──────────────────────────────────
+  O parser das linhas é real e roda no cliente. O que ele faz ao final é
+  montar uma busca por código; ele NÃO adiciona ao carrinho. Duas razões:
+  numa demo em build estático o carrinho não fecha (ver README), e resolver
+  código → produto exige um GET por linha na API, que numa loja de verdade
+  seria um endpoint de lote.
+
+  Ligar de verdade = trocar o `window.location` do final por uma chamada ao
+  `/api/products?sku=...` e um `addToCart` por item resolvido.
+*/
+import type { CmsFields, InferCmsOutput } from '@@sf/content';
+
+export const cmsFields = ({
+  title: {
+    widget: 'string',
+    label: { pt: 'Título', en: 'Title' },
+  },
+}) as const satisfies CmsFields;
+
+export type Props = InferCmsOutput<typeof cmsFields>;
+const { title = 'Pedido rápido' } = Astro.props;
+---
+
+<section class="ui-section">
+  <div class="grid gap-6 border border-base-200 bg-base-50 p-6 md:grid-cols-2
+    md:gap-10 md:p-8">
+    <div>
+      <h2 class="ui-text-brand text-2xl leading-tight text-base-900 md:text-3xl">
+        {title}
+      </h2>
+      <p class="mt-3 text-sm leading-relaxed text-base-700">
+        Já sabe o que precisa? <span class="ui-grifo">Cole a lista inteira de
+        uma vez</span> — um código por linha, com a quantidade ao lado. Não
+        precisa navegar o catálogo.
+      </p>
+
+      <dl class="mt-5 space-y-2.5 text-sm">
+        <div class="flex gap-3">
+          <dt class="ui-codigo shrink-0 pt-0.5">FORMATO</dt>
+          <dd class="text-base-600">
+            <code class="font-mono">CÓDIGO, QUANTIDADE</code> — vírgula, ponto e
+            vírgula, tabulação ou espaço, tanto faz.
+          </dd>
+        </div>
+        <div class="flex gap-3">
+          <dt class="ui-codigo shrink-0 pt-0.5">SEM QTD</dt>
+          <dd class="text-base-600">Linha sem número vale como 1 unidade.</dd>
+        </div>
+      </dl>
+    </div>
+
+    <form data-pedido-rapido>
+      <label for="PedidoRapido" class="mb-1.5 block text-xs font-semibold
+        uppercase tracking-wide text-base-600">
+        Cole sua lista
+      </label>
+      <textarea
+        id="PedidoRapido"
+        name="linhas"
+        rows="7"
+        spellcheck="false"
+        placeholder={'PAP-A4-75G, 10\nCAN-ESF-AZUL 50\nPAS-AZ-OF; 6'}
+        class="w-full rounded border border-base-300 bg-white px-3 py-2.5
+        font-mono text-sm leading-relaxed text-base-900 placeholder:text-base-400
+        focus:border-primary focus:outline-none"
+      ></textarea>
+
+      <output
+        data-pedido-resumo
+        class="mt-2 block min-h-[1.25rem] text-xs text-base-600"
+      ></output>
+
+      <button type="submit" class="mt-3 w-full ui-btn ui-btn-primary">
+        Conferir os itens
+      </button>
+      <p class="mt-2 text-[0.6875rem] leading-relaxed text-base-500">
+        Vitrine de demonstração: os itens são levados para a busca, não para o
+        carrinho — nas demos o checkout não fecha.
+      </p>
+    </form>
+  </div>
+</section>
+
+<script>
+  /*
+    Parser das linhas coladas. Aceita `CODIGO, QTD`, `CODIGO;QTD`, `CODIGO QTD`
+    e `CODIGO` sozinho. A quantidade é sempre o ÚLTIMO número da linha: código
+    de papelaria costuma ter dígito no meio (`PAP-A4-75G`), e pegar o primeiro
+    número transformaria "A4" em quantidade 4.
+  */
+  type Item = { codigo: string; quantidade: number };
+
+  const parseLinha = (linha: string): Item | null => {
+    const limpa = linha.trim();
+    if (!limpa) return null;
+    const m = limpa.match(/^(.*?)[\s,;\t]+(\d+)$/);
+    if (m) {
+      return { codigo: m[1].trim(), quantidade: Number(m[2]) || 1 };
+    }
+    return { codigo: limpa.replace(/[,;]+$/, ''), quantidade: 1 };
+  };
+
+  const parse = (texto: string): Item[] => texto
+    .split(/\r?\n/)
+    .map(parseLinha)
+    .filter((i): i is Item => i !== null && i.codigo.length > 0);
+
+  document.querySelectorAll<HTMLFormElement>('[data-pedido-rapido]').forEach((form) => {
+    const campo = form.querySelector<HTMLTextAreaElement>('textarea')!;
+    const resumo = form.querySelector<HTMLOutputElement>('[data-pedido-resumo]')!;
+
+    const atualizar = () => {
+      const itens = parse(campo.value);
+      if (!itens.length) {
+        resumo.textContent = '';
+        return itens;
+      }
+      const total = itens.reduce((soma, i) => soma + i.quantidade, 0);
+      const plural = itens.length === 1 ? 'código' : 'códigos';
+      resumo.textContent = `${itens.length} ${plural}, ${total} un. no total`;
+      return itens;
+    };
+
+    campo.addEventListener('input', atualizar);
+    form.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const itens = atualizar();
+      if (!itens.length) {
+        campo.focus();
+        return;
+      }
+      window.location.href = `/s?q=${encodeURIComponent(itens.map((i) => i.codigo).join(' '))}`;
+    });
+  });
+</script>
