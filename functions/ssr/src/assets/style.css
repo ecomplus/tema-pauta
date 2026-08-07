@@ -93,10 +93,19 @@ a, button, button > *, [role=button], [role=button] > * {
   padding-inline: 0.15em;
 }
 
-/* Código do produto: é por ele que a recompra acontece, então tem tipo
-   monoespaçado próprio e é selecionável de um clique no card. */
+/*
+ * Código do produto: é por ele que a recompra acontece, então tem tipo
+ * monoespaçado próprio e é selecionável de um clique no card.
+ *
+ * SEM `uppercase`, e isso importa. A busca por SKU na API é sensível a caixa —
+ * `nb-apl-154` acha, `NB-APL-154` não. Com `text-transform: uppercase` o card
+ * exibia o código numa caixa que não existe no cadastro: quem copiasse levava
+ * a caixa certa (o clipboard ignora o `text-transform`), mas quem lesse na tela
+ * e redigitasse levava a errada, e o pedido rápido devolvia "não encontrado".
+ * Mostrar o código como ele é custa nada e evita o falso negativo.
+ */
 .ui-codigo {
-  @apply inline-block font-mono text-[0.6875rem] font-semibold uppercase
+  @apply inline-block font-mono text-[0.6875rem] font-semibold
   tracking-wide text-base-500 select-all;
 }
 

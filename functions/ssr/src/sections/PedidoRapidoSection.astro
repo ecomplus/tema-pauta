@@ -4,25 +4,20 @@
 
   Papelaria de escritório não é compra de descoberta: é reposição. O mesmo
   comprador pede quase a mesma lista todo mês, e a navegação por vitrine é
-  atrito puro para ele — são doze cliques para repetir um pedido que ele já
-  sabe de cor.
+  atrito puro para ele — vinte itens viram mais de cem cliques.
 
-  Esta seção troca a navegação inteira por uma caixa de texto: cola o código e
-  a quantidade, uma por linha, e pronto. É a mesma ideia do "quick order" de
-  distribuidor B2B, e é o que separa a Pauta da Bitola: as duas são B2B, mas a
-  Bitola resolve ESPECIFICAÇÃO (que peça serve) e a Pauta resolve REPETIÇÃO.
+  Esta seção troca a navegação inteira por uma caixa de texto. É a mesma ideia
+  do "quick order" de distribuidor B2B, e é o que separa a Pauta da Bitola: as
+  duas são B2B, mas a Bitola resolve ESPECIFICAÇÃO (que peça serve) e a Pauta
+  resolve REPETIÇÃO (o mesmo pedido de novo).
 
-  ── O QUE É REAL E O QUE É DEMONSTRAÇÃO ──────────────────────────────────
-  O parser das linhas é real e roda no cliente. O que ele faz ao final é
-  montar uma busca por código; ele NÃO adiciona ao carrinho. Duas razões:
-  numa demo em build estático o carrinho não fecha (ver README), e resolver
-  código → produto exige um GET por linha na API, que numa loja de verdade
-  seria um endpoint de lote.
-
-  Ligar de verdade = trocar o `window.location` do final por uma chamada ao
-  `/api/products?sku=...` e um `addToCart` por item resolvido.
+  A parte interativa vive em `components/PedidoRapido.vue` — ela precisa
+  resolver cada código contra a API e mexer no carrinho, e isso é trabalho de
+  componente, não de `<script>` solto. O porquê da mudança está no cabeçalho
+  de lá.
 */
 import type { CmsFields, InferCmsOutput } from '@@sf/content';
+import PedidoRapido from '~/components/PedidoRapido.vue';
 
 export const cmsFields = ({
   title: {
@@ -33,6 +28,15 @@ export const cmsFields = ({
 
 export type Props = InferCmsOutput<typeof cmsFields>;
 const { title = 'Pedido rápido' } = Astro.props;
+
+/*
+  A base da API vai como prop porque o componente resolve os códigos no
+  cliente, e lá `process.env` não existe. `ECOM_STORE_ID` vem do `.env` de
+  `functions/ssr` (ver `demo-catalog/scripts/criar-env-dev.sh`); o `1011` é o
+  mesmo fallback que o storefront usa quando a variável falta.
+*/
+const storeId = process.env.ECOM_STORE_ID || '1011';
+const apiBase = `${process.env.API_BASE_URL || 'https://ecomplus.io/v2'}/:${storeId}`;
 ---
 
 <section class="ui-section">
@@ -60,90 +64,35 @@ const { title = 'Pedido rápido' } = Astro.props;
           <dt class="ui-codigo shrink-0 pt-0.5">SEM QTD</dt>
           <dd class="text-base-600">Linha sem número vale como 1 unidade.</dd>
         </div>
+        <div class="flex gap-3">
+          <dt class="ui-codigo shrink-0 pt-0.5">ONDE ACHO</dt>
+          <dd class="text-base-600">
+            O código fica no card de cada produto. Um clique nele seleciona
+            inteiro, pronto para copiar.
+          </dd>
+        </div>
       </dl>
+
+      <p class="mt-5 text-[0.6875rem] leading-relaxed text-base-500">
+        A conferência consulta o catálogo de verdade e o botão adiciona tudo ao
+        carrinho. O checkout é que não fecha nas demos — vale para as quinze.
+      </p>
     </div>
 
-    <form data-pedido-rapido>
-      <label for="PedidoRapido" class="mb-1.5 block text-xs font-semibold
-        uppercase tracking-wide text-base-600">
-        Cole sua lista
-      </label>
-      <textarea
-        id="PedidoRapido"
-        name="linhas"
-        rows="7"
-        spellcheck="false"
-        placeholder={'PAP-A4-75G, 10\nCAN-ESF-AZUL 50\nPAS-AZ-OF; 6'}
-        class="w-full rounded border border-base-300 bg-white px-3 py-2.5
-        font-mono text-sm leading-relaxed text-base-900 placeholder:text-base-400
-        focus:border-primary focus:outline-none"
-      ></textarea>
+    <!--
+      `client:sf="load"` e não `lazy,interaction`.
 
-      <output
-        data-pedido-resumo
-        class="mt-2 block min-h-[1.25rem] text-xs text-base-600"
-      ></output>
+      Com hidratação adiada o componente sobe como HTML morto: quem começa a
+      digitar antes de o Vue assumir perde as primeiras teclas, e o botão
+      continua desabilitado porque o `v-model` nunca viu o texto. Foi
+      reproduzido com o campo preenchido e o botão preso em `disabled`.
 
-      <button type="submit" class="mt-3 w-full ui-btn ui-btn-primary">
-        Conferir os itens
-      </button>
-      <p class="mt-2 text-[0.6875rem] leading-relaxed text-base-500">
-        Vitrine de demonstração: os itens são levados para a busca, não para o
-        carrinho — nas demos o checkout não fecha.
-      </p>
-    </form>
+      Numa vitrine isso é aceitável — a `ProductShelf` usa `lazy,interaction` e
+      o pior caso é um card demorar a responder. Aqui não: este formulário é a
+      razão de a página existir, e o custo de subir o JS junto com a página é
+      menor que o de perder a primeira interação. Mesmo motivo pelo qual
+      `ProductDetails` e `SearchShowcase` usam `load`.
+    -->
+    <PedidoRapido {apiBase} client:sf="load" />
   </div>
 </section>
-
-<script>
-  /*
-    Parser das linhas coladas. Aceita `CODIGO, QTD`, `CODIGO;QTD`, `CODIGO QTD`
-    e `CODIGO` sozinho. A quantidade é sempre o ÚLTIMO número da linha: código
-    de papelaria costuma ter dígito no meio (`PAP-A4-75G`), e pegar o primeiro
-    número transformaria "A4" em quantidade 4.
-  */
-  type Item = { codigo: string; quantidade: number };
-
-  const parseLinha = (linha: string): Item | null => {
-    const limpa = linha.trim();
-    if (!limpa) return null;
-    const m = limpa.match(/^(.*?)[\s,;\t]+(\d+)$/);
-    if (m) {
-      return { codigo: m[1].trim(), quantidade: Number(m[2]) || 1 };
-    }
-    return { codigo: limpa.replace(/[,;]+$/, ''), quantidade: 1 };
-  };
-
-  const parse = (texto: string): Item[] => texto
-    .split(/\r?\n/)
-    .map(parseLinha)
-    .filter((i): i is Item => i !== null && i.codigo.length > 0);
-
-  document.querySelectorAll<HTMLFormElement>('[data-pedido-rapido]').forEach((form) => {
-    const campo = form.querySelector<HTMLTextAreaElement>('textarea')!;
-    const resumo = form.querySelector<HTMLOutputElement>('[data-pedido-resumo]')!;
-
-    const atualizar = () => {
-      const itens = parse(campo.value);
-      if (!itens.length) {
-        resumo.textContent = '';
-        return itens;
-      }
-      const total = itens.reduce((soma, i) => soma + i.quantidade, 0);
-      const plural = itens.length === 1 ? 'código' : 'códigos';
-      resumo.textContent = `${itens.length} ${plural}, ${total} un. no total`;
-      return itens;
-    };
-
-    campo.addEventListener('input', atualizar);
-    form.addEventListener('submit', (ev) => {
-      ev.preventDefault();
-      const itens = atualizar();
-      if (!itens.length) {
-        campo.focus();
-        return;
-      }
-      window.location.href = `/s?q=${encodeURIComponent(itens.map((i) => i.codigo).join(' '))}`;
-    });
-  });
-</script>
