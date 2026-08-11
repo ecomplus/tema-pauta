@@ -4,9 +4,15 @@ Cópia do starter [`ecomplus/store`](https://github.com/ecomplus/store)
 tematizada para **papelaria e material de escritório**, atendendo empresa e
 consumidor final.
 
-> **Este nicho ainda não existe no site institucional.** Não há marca em
-> `src/config/brands.ts` nem página em `/segmentos/`. O posicionamento foi
-> **proposto**, não portado. Nome, logo e domínio são placeholders.
+> **Página de segmento escrita; demo ainda NÃO publicada.**
+> `/segmentos/papelaria-e-escritorio` (Papelaria e escritório) já existe em `www.e-com.plus`, na branch
+> `feature/beleza`, e aponta para `tema-pauta.web.app` — que ainda responde
+> 404. **Publicar a demo antes de subir o site**, senão a página institucional
+> sai com link morto.
+>
+> Não há marca em `src/config/brands.ts`: aquele arquivo é a camada das
+> variantes `/demo/<slug>`, que é outra coisa. Nome, logo e domínio aqui são
+> placeholders.
 
 ## A tese do tema: o eixo é RECOMPRA, não descoberta
 
@@ -58,17 +64,28 @@ Se o amarelo virar fundo de bloco, a marca perde a referência ao marca-texto.
 | O quê | Onde | Como ligar |
 |---|---|---|
 | "a partir de 12 un. o preço cai" | `ProductCard.vue` | Preço por quantidade (kit/atacado) cadastrado |
-| Resultado do pedido rápido | `PedidoRapidoSection.astro` | Ver abaixo |
 
-**O pedido rápido não adiciona ao carrinho.** O parser é real e roda no
-cliente, mas o que ele faz ao final é montar uma busca. Duas razões: numa demo
-em build estático o carrinho não fecha, e resolver código → produto exigiria um
-GET por linha na API (numa loja de verdade, um endpoint de lote).
+**O pedido rápido funciona de verdade** — é a exceção do conjunto. Ele resolve
+cada código contra a API pública, monta a conferência com nome, quantidade e
+subtotal, e adiciona tudo ao carrinho. Só o checkout não fecha, o que é
+consequência do build estático e vale para as dezesseis lojas.
 
-Ligar de verdade = trocar o `window.location` do final por uma chamada a
-`/api/products?sku=…` e um `addToCart` por item resolvido.
+A primeira versão não fazia isso: contava as linhas e mandava tudo para
+`/s?q=<códigos>`. O parser funcionava, mas a busca da loja ignora termo que
+não casa, então colar quatro códigos precisos devolvia 81 produtos sem relação
+nenhuma — a promessa era conferir um pedido e a entrega era o catálogo inteiro.
 
-A própria seção diz isso ao visitante. **Manter.**
+### A busca por SKU é sensível a caixa
+
+`nb-apl-154` acha; `NB-APL-154` devolve zero. O componente tenta como veio,
+minúsculo e maiúsculo, mas **caixa mista não tem solução por tentativa** —
+seriam 2^n combinações. Por isso a mensagem de "não encontrado" diz
+explicitamente que a caixa importa.
+
+E por isso `.ui-codigo` **não** aplica `uppercase`: o card exibia o código
+numa caixa que não existe no cadastro, então quem copiava levava a certa e quem
+lia e redigitava levava a errada. **Nunca aplicar `text-transform` em código
+de produto.**
 
 ## Pendências conhecidas
 
