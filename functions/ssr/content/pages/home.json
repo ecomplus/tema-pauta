@@ -37,7 +37,7 @@
     },
     {
       "type": "product-shelf",
-      "collectionIdAndInfo": null,
+      "collectionIdAndInfo": "6a7bca521b2a366caaeb330e:categories:Escrita e papel:/escrita-e-papel",
       "sort": "-sales",
       "title": "Os mais repostos",
       "isHeadless": false,
@@ -73,7 +73,7 @@
     },
     {
       "type": "product-shelf",
-      "collectionIdAndInfo": null,
+      "collectionIdAndInfo": "6a7bca551b2a366caaeb3328:categories:Organização de escritório:/organizacao-de-escritorio",
       "sort": "-price_discount",
       "title": "Em promoção",
       "isHeadless": false,

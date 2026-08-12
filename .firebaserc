@@ -1,0 +1,6 @@
+{
+  "projects": { "default": "themes-d2495" },
+  "targets": {
+    "themes-d2495": { "hosting": { "pauta": ["tema-pauta"] } }
+  }
+}
